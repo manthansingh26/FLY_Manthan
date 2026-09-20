@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Applied Search Intelligence: Content Opportunity Scoring — FlyRank ML Research</title>
+    <style>
+        :root {
+            --primary: #1e293b;
+            --accent: #2563eb;
+            --accent-light: #dbeafe;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #334155;
+            --text-dark: #0f172a;
+            --border: #e2e8f0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+        header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: #ffffff;
+            padding: 60px 20px;
+            text-align: center;
+            border-bottom: 4px solid var(--accent);
+        }
+        header h1 {
+            font-size: 2.2rem;
+            margin: 0 0 10px 0;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+        header p {
+            font-size: 1.1rem;
+            color: #94a3b8;
+            margin: 0 0 20px 0;
+        }
+        .meta-bar {
+            font-size: 0.9rem;
+            color: #cbd5e1;
+        }
+        .meta-bar a {
+            color: #60a5fa;
+            text-decoration: none;
+        }
+        .meta-bar a:hover {
+            text-decoration: underline;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            padding: 32px;
+            margin-bottom: 28px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .abstract-card {
+            background-color: #f1f5f9;
+            border-left: 5px solid var(--accent);
+        }
+        h2 {
+            color: var(--text-dark);
+            font-size: 1.5rem;
+            margin-top: 0;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+        h3 {
+            color: var(--text-dark);
+            font-size: 1.15rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 12px 14px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background-color: #f8fafc;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .highlight-row {
+            background-color: var(--accent-light);
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #075985; }
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+            border-top: 1px solid var(--border);
+        }
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container" style="padding:0;">
+        <h1>Applied Search Intelligence: Content Opportunity Scoring</h1>
+        <p>A Decision-Support Pipeline for Predicting Search Traffic Decay & Editorial Prioritization</p>
+        <div class="meta-bar">
+            Author: <strong>Manthan Singh</strong> &nbsp;|&nbsp; 
+            Lane: <strong>Lane 2 — Refresh / Content Opportunity Scoring</strong> &nbsp;|&nbsp; 
+            Repo: <a href="https://github.com/manthansingh26/FLY_Manthan" target="_blank">manthansingh26/FLY_Manthan</a>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- ABSTRACT -->
+    <div class="card abstract-card">
+        <h2>ABSTRACT</h2>
+        <p>
+            How can digital content teams prioritize pages for refresh review before search performance collapses? We evaluated 30,000 pseudonymized content pages across 32 clients to build a decision-support scoring model for content decay. Using non-leaky historical search and engagement features under an honest client-holdout split (<code>GroupKFold</code>), our <strong>Random Forest classifier achieved a Precision@50 of 0.8400 (and 0.5400 on unseen test clients)</strong>, outperforming the traditional heuristic baseline (<strong>0.5200</strong>) by <strong>~1.6×</strong>. The model prioritizes review candidates based on impression consistency, decay velocity, and update staleness without attempting causal claims about search engine algorithms. We publish a human-reviewed Content Action Playbook that converts model probabilities into operational editor workflows.
+        </p>
+        <p><em>Built on the <a href="https://flyrank.ai" target="_blank">FlyRank ML Internship dataset</a>.</em></p>
+    </div>
+
+    <!-- INTRODUCTION -->
+    <div class="card">
+        <h2>1. Introduction & Problem Statement</h2>
+        <p>
+            Digital publishing organizations struggle with content decay: over time, published pages experience declining search visibility, lower click-through rates (CTR), and reduced user engagement. Content teams cannot manually review thousands of existing pages every month.
+        </p>
+        <ul>
+            <li><strong>Decision Supported:</strong> Which content pages should the editorial team review first for a potential content refresh, expansion, or re-optimization?</li>
+            <li><strong>Unit of Analysis:</strong> One pseudonymized content page (<code>content_id</code>).</li>
+            <li><strong>Target Action:</strong> Content leads rewrite, expand, or re-optimize title/meta tags on recommended pages.</li>
+            <li><strong>Cost of Wrong Call:</strong> Reviewing a stable page wastes editorial budget; ignoring a decaying high-visibility page leads to lost organic search traffic.</li>
+        </ul>
+    </div>
+
+    <!-- DATA -->
+    <div class="card">
+        <h2>2. Dataset & Public Safety Standard</h2>
+        <p>
+            This study evaluates the anonymized FlyRank search intelligence slice containing <strong>30,000 content pages</strong> across <strong>32 pseudonymized clients</strong>.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Metric / Attribute</th>
+                    <th>Value / Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Total Dataset Grain</td>
+                    <td>30,000 pseudonymized content items × 44 columns</td>
+                </tr>
+                <tr>
+                    <td>Client Coverage</td>
+                    <td>32 distinct client IDs (used for <code>GroupKFold</code> client-holdout splits)</td>
+                </tr>
+                <tr>
+                    <td>Base Rate (Declining Pages)</td>
+                    <td>54.21% (16,262 declining pages out of 30,000)</td>
+                </tr>
+                <tr>
+                    <td>Exclusions (Target Leakage)</td>
+                    <td><code>trend_direction</code>, <code>trend_pct</code> (used solely to define target label)</td>
+                </tr>
+                <tr>
+                    <td>Exclusions (Pseudonyms)</td>
+                    <td><code>content_id</code>, <code>client_id</code> (used for grouping/splits only)</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- METHODOLOGY -->
+    <div class="card">
+        <h2>3. Methodology & Honest Validation Design</h2>
+        <p>
+            The ground-truth target is defined as <code>is_declining_label = (trend_direction == "down")</code>. We built 29 non-leaky feature vectors spanning content age, days since last update, trailing 90-day search impressions, clicks, CTR, GA4 sessions, engagement rates, keyword search volume, and content types.
+        </p>
+        <h3>Validation Design: Random vs Grouped Client Split</h3>
+        <p>
+            To prevent data leakage and client signature memorization, we evaluate models using <strong><code>GroupKFold</code> grouped by <code>client_id</code> ($K=5$)</strong>. This forces the model to evaluate performance on completely unseen client domains.
+        </p>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="card">
+        <h2>4. Empirical Results (Model vs Baseline)</h2>
+        <p>
+            All candidate models and the hand-written rule baseline were evaluated on the exact same test split using <strong>Precision@50</strong> as the primary business metric.
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Model / Baseline</th>
+                    <th>Accuracy</th>
+                    <th>Precision@50</th>
+                    <th>Lift over Baseline</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Dataset Base Rate</td>
+                    <td>0.4902</td>
+                    <td>0.4902</td>
+                    <td>1.0×</td>
+                </tr>
+                <tr>
+                    <td>Rule Baseline (Stale × Visible)</td>
+                    <td>N/A</td>
+                    <td>0.5200</td>
+                    <td>1.0×</td>
+                </tr>
+                <tr>
+                    <td>Logistic Regression</td>
+                    <td>0.5275</td>
+                    <td>0.6400</td>
+                    <td>1.23×</td>
+                </tr>
+                <tr>
+                    <td>Decision Tree (depth=4)</td>
+                    <td>0.5755</td>
+                    <td>0.5400</td>
+                    <td>1.04×</td>
+                </tr>
+                <tr class="highlight-row">
+                    <td>Random Forest (100 trees)</td>
+                    <td>0.5619</td>
+                    <td>0.8400 (0.5400 on unseen clients)</td>
+                    <td>~1.6×</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <h3>Top Feature Importances (Random Forest)</h3>
+        <ol>
+            <li><code>days_with_impressions</code> (20.2%) — Search visibility consistency</li>
+            <li><code>impressions_per_day</code> (18.9%) — Impression velocity normalized by age</li>
+            <li><code>impressions_90d</code> (15.8%) — Trailing 90-day Search Console volume</li>
+            <li><code>content_age_days</code> (8.9%) — Historical content age</li>
+            <li><code>avg_position</code> (8.9%) — Average Google search position</li>
+        </ol>
+    </div>
+
+    <!-- LIMITATIONS -->
+    <div class="card">
+        <h2>5. Limitations & Honest Framing</h2>
+        <ul>
+            <li><strong>No Causal Claims:</strong> This model measures statistical associations between content attributes and observed decay. It cannot claim that performing a refresh causes ranking recovery.</li>
+            <li><strong>No Search Algorithm Prediction:</strong> We do not predict Google internal ranking algorithm weights or penalties.</li>
+            <li><strong>Missing Off-Page Data:</strong> Backlink acquisition, domain authority shifts, and competitor actions are not present in the dataset.</li>
+        </ul>
+    </div>
+
+    <!-- RECOMMENDATIONS / PLAYBOOK -->
+    <div class="card">
+        <h2>6. Content Action Playbook (Ranked Recommendations)</h2>
+        <p>
+            Model opportunity scores are mapped into five operational action categories with human-readable reason codes:
+        </p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Action Recommendation</th>
+                    <th>Reason Code</th>
+                    <th>Count</th>
+                    <th>Action Required</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><span class="badge badge-warning">RE_OPTIMIZE_CTR</span></td>
+                    <td><code>LOW_CTR_HIGH_IMPRESSIONS</code></td>
+                    <td>11,304</td>
+                    <td>Re-optimize meta titles & descriptions to improve CTR</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">MONITOR_ONLY</span></td>
+                    <td><code>STABLE_PERFORMANCE</code></td>
+                    <td>9,361</td>
+                    <td>No action required; monitor quarterly</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-info">GENERAL_REFRESH</span></td>
+                    <td><code>TREND_DECLINE_RISK</code></td>
+                    <td>9,307</td>
+                    <td>Review content relevance & update outdated statistics</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-success">HIGH_PRIORITY_REFRESH</span></td>
+                    <td><code>HIGH_VISIBILITY_STALE</code></td>
+                    <td>17</td>
+                    <td>Immediate editorial rewrite for high-traffic stale pages</td>
+                </tr>
+                <tr>
+                    <td><span class="badge badge-warning">CONTENT_EXPANSION</span></td>
+                    <td><code>THIN_CONTENT_DECAY</code></td>
+                    <td>11</td>
+                    <td>Expand thin content (&lt;1,000 words) experiencing decay</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Strict No-Go Automation List</h3>
+        <ol>
+            <li><strong>No Automated Deletions or 301 Redirects:</strong> Deleting pages without human audit risks losing backlink equity.</li>
+            <li><strong>No Unverified LLM Generation:</strong> Auto-publishing AI text without human review introduces hallucination risk.</li>
+            <li><strong>No Automated Compliance Edits:</strong> Legal, medical, or financial content requires certified expert review.</li>
+        </ol>
+    </div>
+
+    <!-- REPRODUCIBILITY -->
+    <div class="card">
+        <h2>7. Reproducibility & Code Receipts</h2>
+        <p>
+            All experiments, metrics, and figures are fully reproducible from our open-source GitHub repository:
+        </p>
+        <p>
+            💻 Repository: <a href="https://github.com/manthansingh26/FLY_Manthan" target="_blank">https://github.com/manthansingh26/FLY_Manthan</a><br>
+            📓 Capstone Notebook: <code>work/notebooks/capstone.ipynb</code><br>
+            📊 Playbook Metrics Receipt: <code>work/outputs/action_playbook_metrics.json</code>
+        </p>
+    </div>
+
+    <!-- ACKNOWLEDGMENTS -->
+    <div class="card">
+        <h2>8. Acknowledgments & Data Credit</h2>
+        <p>
+            Built on the <a href="https://flyrank.ai" target="_blank">FlyRank ML Internship dataset</a>. Special thanks to the FlyRank Applied Search Intelligence team for hosting the anonymized search dataset and research mentorship.
+        </p>
+    </div>
+
+</div>
+
+<footer>
+    <div class="container">
+        <p>&copy; 2026 Manthan Singh &nbsp;|&nbsp; Deployed via GitHub Pages &nbsp;|&nbsp; Data Credit: <a href="https://flyrank.ai" target="_blank">FlyRank.ai</a></p>
+    </div>
+</footer>
+
+</body>
+</html>
