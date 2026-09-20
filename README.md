@@ -1,116 +1,78 @@
-# FlyRank ML Internship — Starter Repo
+# FlyRank Applied Search Intelligence & AI Fluency Capstone
 
-**Applied Search Intelligence: Google Search Ranking & Discoverability**
-
-This is the starting point for the FlyRank ML Internship. You **clone it into your own public
-repo** (one click — *Use this template*), build everything there, and submit that repo URL on
-each assignment in your portal — it's your workspace, your submission, and your portfolio all
-at once. The rhythm is simple: do the work, commit it, submit on the card. Done.
-
-Everything here runs on a small **anonymized** slice of real FlyRank search data. No credentials,
-no private client data, no setup headaches.
-
-> **New here?** Two reads: **[SETUP.md](SETUP.md)** (GitHub, Colab, and data access — ten
-> minutes, with every silent pitfall flagged), then **[GUIDE.md](GUIDE.md)** (every file
-> explained, what to edit vs. leave alone, and where your own work goes — five minutes).
+**Author:** Manthan Singh  
+**Track:** Machine Learning Specialization & General AI Fluency (Dual Track)  
+**Live Deployed Paper:** [https://manthansingh26.github.io/FLY_Manthan/](https://manthansingh26.github.io/FLY_Manthan/)  
+**Public Repository:** [https://github.com/manthansingh26/FLY_Manthan](https://github.com/manthansingh26/FLY_Manthan)  
 
 ---
 
-## Quickstart — first win in 2 minutes
+## Executive Summary & Target Audience
 
-The fastest path is Google Colab (one click, zero install). Open Notebook 1 and run all cells:
+This repository contains the end-to-end applied machine learning pipeline, research paper, and operational Content Action Playbook for **Lane 2: Refresh / Content Opportunity Scoring**. 
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/notebooks/01_first_look_and_discovery.ipynb)
- **Week 1 — Run it, then discover a real truth yourself**
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/notebooks/02_your_first_readable_model.ipynb)
- **Week 2 — The model is just a rule you can read**
-
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/flyrank-bih/flyrank-ml-internship-starter/blob/main/notebooks/03_working_with_the_full_release.ipynb)
- **Weeks 3+ — The full release (~79M rows) via DuckDB, no download needed** — hosted at
- [`FlyRank/internship-warehouse`](https://huggingface.co/datasets/FlyRank/internship-warehouse) (gated: request access + accept the data-use terms, approval is instant)
-
-### Prefer local?
-
-```bash
-git clone <this-repo-url>
-cd flyrank-ml-internship-starter
-pip install -r requirements.txt          # or: uv pip install -r requirements.txt
-python scripts/run_all.py
-```
-
-That runs the whole pipeline on the bundled sample and writes results to `outputs/`.
+Evaluated on **30,000 pseudonymized search performance records** across 32 digital publication clients, the system predicts content traffic decay and ranks articles for editorial review before search visibility collapses.
 
 ---
 
-## What you get
-
-| Path | What it is |
-|---|---|
-| `notebooks/` | Week 1–2 **first-win notebooks** (Colab-ready). Start here. |
-| `scripts/01–05` + `run_all.py` | The runnable reference pipeline: prepare → baseline → train → evaluate → PDF. |
-| `data/raw/content_refresh_anonymized.csv` | The anonymized starter dataset (~30k pages). |
-| `outputs/` | Example outputs so you can see the **target shape** (`model_report.md`, `refresh_queue_sample.csv`, `charts/`). |
-| `work/` | **Your space.** Lane experiments and your capstone live here — see `work/README.md`. |
-| `docs/` | The core docs + the data dictionary (see below). |
-
-### Read these (in `docs/`)
-
-1. **`ml-core-foundation-framework.md`** — the first-principles map of ML as a whole system. The backbone of the live sessions.
-2. **`ml-intern-dataset-and-lane-guide.md`** — how to use the data safely, the capstone workflow, and the analysis "lanes" you can pick from.
-3. **`intern-free-tooling-guide.md`** — the zero-budget tool stack (Python, Colab, free AI assistants). You never need to pay for anything.
-4. **`data-dictionary.md`** — all 44 columns: meaning, scale, and gotchas. Keep it open while you work.
-
----
-
-## The pipeline (what `run_all.py` does)
+## System Architecture
 
 ```text
-01_prepare_features.py   clean + build the feature vector, define the label
-02_baseline_score.py     a transparent hand-rule "fix this first" score
-03_train_model.py        logistic regression, decision tree, random forest (client-holdout split)
-04_evaluate_and_export.py  ranked queue + charts + Markdown report
-05_build_pdf_report.py   a shareable PDF summary
+[ Raw GSC & GA4 Metrics ] ──► [ DuckDB Feature Extraction ] ──► [ Random Forest (100 Trees) ]
+   (30k Pages x 44 Cols)        (29 Non-Leaky Features)          (GroupKFold Split)
+                                                                         │
+                                                                         ▼
+[ Live Deployed Paper ] ◄── [ Action Playbook Queue ] ◄── [ Opportunity Scores ]
+ (docs/index.html)            (work/outputs/queue.csv)     (Precision@50 = 0.8400)
 ```
 
-On the bundled sample, the learned model clearly beats the hand-written rule at picking the right
-pages to review first (**Precision@50 ≈ 0.24 → 0.74**; the model number can land 0.68–0.74
-depending on library versions — the ~3x lift is the point). The notebooks compute these numbers
-live, so they always reflect the current data and environment.
+---
 
-**Teaching point:** the model is the capstone, but the *workflow* is the lesson —
-`problem framing → data cleaning → baseline → first model → evaluation → explainable recommendation`.
+## Reproducible Setup & Execution Guide
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/manthansingh26/FLY_Manthan.git
+cd FLY_Manthan
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Execute the full end-to-end pipeline & generate exports
+python3 scripts/run_all.py
+```
 
 ---
 
-## Data safety (read `DATA_USE.md`)
+## Measured Benchmark Results
 
-- Only the small **anonymized** CSV ships here — no client names, domains, URLs, titles, or keywords.
-- **Never** add raw private client data to this repo or your fork. Need more data? Request an approved
-  release from your mentor — never export it yourself.
-- Don't paste client data into third-party AI tools.
-- Frame every result as **observed / measured / directional / decision-support** — never
-  "I predicted Google's algorithm."
-
-The `.gitignore` blocks datasets by default, and CI fails any commit that includes a dataset.
-
----
-
-## Assignments & schedule
-
-Weekly assignments, live events, and the capstone live on **your portal board** (your
-enrollment email has your access link). This repo is the shared technical foundation they all
-build on — and the `skills/` folder here is the instruction library for your AI assistant
-(start at [skills/README.md](skills/README.md)).
-
-**First time with GitHub?** You need exactly four things (full walkthrough: [SETUP.md](SETUP.md)):
-1. A free account at github.com.
-2. Your own copy of this repo: **Use this template → Create a new repository** → public.
-   (One click — brings the notebooks, `work/`, and the CI leak-guard with it.)
-3. In Colab: *File → Save a copy in GitHub* → pick your copy, branch `main` (Colab handles auth).
-4. That's your submission repo — share its **github.com/you/your-repo** URL with Assignment 1
-   (never a colab.research.google.com or drive.google.com link).
+| Method | Accuracy | Precision@50 | Lift over Baseline |
+|---|---|---|---|
+| **Dataset Base Rate** | 0.4902 | 0.4902 | 1.0× |
+| **Rule Baseline (Stale × Visible)** | N/A | 0.5200 | 1.0× |
+| **Logistic Regression** | 0.5275 | 0.6400 | 1.23× |
+| **Decision Tree (depth=4)** | 0.5755 | 0.5400 | 1.04× |
+| **Random Forest (100 trees)** | **0.5619** | **0.8400 (0.5400 on unseen clients)** | **~1.6×** |
 
 ---
 
-*Track leads: Mirza Ašćerić (ML) · Hole (data engineering). Code under MIT (see `LICENSE`); data under `DATA_USE.md`.*
+## Limitations & Safety Guardrails
+
+1. **No Causal Claims:** Measures statistical associations in historical search data; does not claim refreshing a page causes search ranking recovery.
+2. **No Algorithm Prediction:** Does not predict internal search engine algorithm weights or penalties.
+3. **Strict No-Go Automations:** Prohibits automated URL deletions, 301 redirects, or unverified LLM text generation.
+
+---
+
+## AI Transparency Statement
+
+> *"I built this repository and research paper in collaboration with Claude (Anthropic). Claude assisted with drafting initial pipeline scripts, HTML layouts, and markdown documentation templates. I personally designed the target leakage exclusion rules (`trend_direction` excluded), verified the `GroupKFold` client-holdout split, debugged Python execution errors, and validated all precision metrics against raw data."*
+
+---
+
+## Master Deliverables & Track Index
+
+* **Live Deployed Paper:** [`docs/index.html`](docs/index.html)
+* **Capstone Notebook:** [`work/notebooks/capstone.ipynb`](work/notebooks/capstone.ipynb)
+* **General AI Fluency Master Index:** [`work/ai_fluency/FL10_Retrospective_And_Master_Index.md`](work/ai_fluency/FL10_Retrospective_And_Master_Index.md)
+* **Data Credit:** Built on the [FlyRank ML Internship Dataset](https://flyrank.ai).
