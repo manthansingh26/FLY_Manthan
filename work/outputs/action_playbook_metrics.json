@@ -1,0 +1,20 @@
+{
+  "total_pages_evaluated": 30000,
+  "base_declining_rate": 0.5420666666666667,
+  "action_distribution": {
+    "RE_OPTIMIZE_CTR": 11304,
+    "MONITOR_ONLY": 9361,
+    "GENERAL_REFRESH": 9307,
+    "HIGH_PRIORITY_REFRESH": 17,
+    "CONTENT_EXPANSION": 11
+  },
+  "reason_code_distribution": {
+    "LOW_CTR_HIGH_IMPRESSIONS": 11304,
+    "STABLE_PERFORMANCE": 9361,
+    "TREND_DECLINE_RISK": 9307,
+    "HIGH_VISIBILITY_STALE": 17,
+    "THIN_CONTENT_DECAY": 11
+  },
+  "top_opportunity_score": 0.7616233251872054,
+  "median_opportunity_score": 0.5778901031690864
+}
