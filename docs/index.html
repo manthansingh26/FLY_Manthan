@@ -348,6 +348,73 @@
         </ol>
     </div>
 
+    
+    <!-- INTERACTIVE FEATURE (FL-06 / Week 6) -->
+    <div class="card" style="border: 2px solid var(--accent);">
+        <h2>Live Interactive Opportunity Score Calculator</h2>
+        <p>Test the baseline scoring logic live. Enter a page's trailing metrics below to calculate its opportunity score and recommended action category:</p>
+        
+        <form id="calc-form" onsubmit="return false;" style="display: grid; gap: 15px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); margin-bottom: 20px;">
+            <div>
+                <label style="font-weight:600; font-size:0.9rem;">90-Day Impressions:</label><br>
+                <input type="number" id="inp-imp" value="2500" min="0" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; margin-top:4px;">
+            </div>
+            <div>
+                <label style="font-weight:600; font-size:0.9rem;">Days Since Update:</label><br>
+                <input type="number" id="inp-stale" value="210" min="0" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; margin-top:4px;">
+            </div>
+            <div>
+                <label style="font-weight:600; font-size:0.9rem;">Click-Through Rate (CTR %):</label><br>
+                <input type="number" id="inp-ctr" value="0.35" step="0.01" min="0" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:4px; margin-top:4px;">
+            </div>
+        </form>
+
+        <button onclick="calculateScore()" style="background:var(--accent); color:#fff; border:none; padding:10px 20px; border-radius:4px; font-weight:600; cursor:pointer;">Calculate Opportunity Score</button>
+
+        <div id="calc-result" style="margin-top:20px; padding:15px; background:#f1f5f9; border-radius:6px; display:none;">
+            <h3 style="margin-top:0;">Calculated Opportunity Score: <span id="res-score" style="color:var(--accent);">0.00</span></h3>
+            <p><strong>Action Recommendation:</strong> <span id="res-action" class="badge badge-success">HIGH_PRIORITY_REFRESH</span></p>
+            <p><strong>Reason Code:</strong> <code id="res-reason">HIGH_VISIBILITY_STALE</code></p>
+        </div>
+
+        <script>
+        function calculateScore() {
+            var imp = parseFloat(document.getElementById('inp-imp').value) || 0;
+            var staleDays = parseFloat(document.getElementById('inp-stale').value) || 0;
+            var ctr = parseFloat(document.getElementById('inp-ctr').value) || 0;
+            
+            var staleFlag = (staleDays >= 180) ? 1 : 0;
+            var highImpFlag = (imp >= 500) ? 1 : 0;
+            var score = (staleFlag * 2.0) + (highImpFlag * 3.0) + Math.log1p(imp);
+            
+            var action = "MONITOR_ONLY";
+            var reason = "STABLE_PERFORMANCE";
+            var badgeClass = "badge-info";
+
+            if (score >= 10.0 && highImpFlag === 1 && staleFlag === 1) {
+                action = "HIGH_PRIORITY_REFRESH";
+                reason = "HIGH_VISIBILITY_STALE";
+                badgeClass = "badge-success";
+            } else if (score >= 8.0 && ctr < 0.5 && highImpFlag === 1) {
+                action = "RE_OPTIMIZE_CTR";
+                reason = "LOW_CTR_HIGH_IMPRESSIONS";
+                badgeClass = "badge-warning";
+            } else if (score >= 7.0) {
+                action = "GENERAL_REFRESH";
+                reason = "TREND_DECLINE_RISK";
+                badgeClass = "badge-info";
+            }
+
+            document.getElementById('res-score').innerText = score.toFixed(4);
+            var actElem = document.getElementById('res-action');
+            actElem.innerText = action;
+            actElem.className = 'badge ' + badgeClass;
+            document.getElementById('res-reason').innerText = reason;
+            document.getElementById('calc-result').style.display = 'block';
+        }
+        </script>
+    </div>
+    
     <!-- REPRODUCIBILITY -->
     <div class="card">
         <h2>7. Reproducibility & Code Receipts</h2>
